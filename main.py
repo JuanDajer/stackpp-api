@@ -1,7 +1,7 @@
 from db.user_db import UserInDB
 from db.user_db import update_user, get_user
 from db.product_db import Producto
-from db.product_db import get_producto, update_producto
+from db.product_db import get_producto, update_producto, catalog_producto
 from db.compra_db import CompraInDB
 from db.compra_db import save_compra
 
@@ -54,4 +54,8 @@ async def make_compra(compra_in: CompraIn):
     compra_in_db = save_compra(compra_in_db)
     compra_out = CompraOut(**compra_in_db.dict())
     return compra_out
+
+@api.post("/product/catalogo/")
+async def catalog_product():
+    return catalog_producto()
 

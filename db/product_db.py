@@ -53,3 +53,10 @@ def get_producto(id_producto: int):
 def update_producto(product: Producto):
     database_products[product.id_producto] = product
     return product
+
+def catalog_producto():
+    lista =[]
+    for i in database_products:
+        a = "id producto:",database_products[i].id_producto,"Nombre:",database_products[i].nombre,"Costo:",database_products[i].costo,"Cantidades disponibles:",database_products[i].cantidad
+        lista.append(a)
+    return lista  
