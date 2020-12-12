@@ -1,12 +1,13 @@
 from db.user_db import UserInDB
-from db.user_db import update_user, get_user
+from db.user_db import update_user, get_user, save_user, lista_user, delete_usuario
 from db.product_db import Producto
-from db.product_db import get_producto, update_producto, catalog_producto
+from db.product_db import get_producto, update_producto, catalog_producto, save_product
 from db.compra_db import CompraInDB
 from db.compra_db import save_compra
 
-from models.user_models import UserIn, UserOut
+from models.user_models import UserIn, UserOut, UserCash
 from models.compra_models import CompraIn, CompraOut
+from models.product_moldels import ProductIn , ProductOut
 
 import datetime
 from fastapi import FastAPI
@@ -49,6 +50,8 @@ async def make_compra(compra_in: CompraIn):
 
     user_in_db.saldo = user_in_db.saldo - (compra_in.cantidad * producto_in_db.costo)
     update_user(user_in_db)
+    producto_in_db.cantidad = producto_in_db.cantidad - compra_in.cantidad
+    update_producto(producto_in_db)
     compra_in_db = CompraInDB(**compra_in.dict(),
                                 actual_saldo = user_in_db.saldo,valor =compra_in.cantidad * producto_in_db.costo)
     compra_in_db = save_compra(compra_in_db)
@@ -58,4 +61,44 @@ async def make_compra(compra_in: CompraIn):
 @api.post("/product/catalogo/")
 async def catalog_product():
     return catalog_producto()
+
+@api.put("/product/create/")
+async def create_product(productoIn: ProductIn):
+    producto_in_db = Producto(**productoIn.dict(),id_producto=0)
+    return save_product(producto_in_db)
+
+@api.put("/user/create/")
+async def create_user(userIn: UserInDB):
+    user_in_db = UserInDB(**userIn.dict())
+    return save_user(user_in_db)
+
+@api.post("/user/lista/")
+async def user_list():
+    return lista_user()
+
+@api.put("/user/credito/")
+async def user_credito(user_cred: UserCash):
+    user_in_db = get_user(user_cred.alias)
+    user_in_db.saldo = user_in_db.saldo + user_cred.valor
+    update_user(user_in_db)
+    return "Nuevo saldo:",user_in_db.saldo
+
+@api.delete("/user/borrar/{nombre}")
+async def user_delete(nombre: str):
+    usuario = get_user(nombre)
+    if usuario == None:
+        raise HTTPException(status_code=404,
+                            detail="El usuario no existe")
+    else:  
+        delete_usuario(nombre)
+        raise HTTPException(status_code=200,
+                                detail="El usuario ha sido eliminado")
+
+
+
+
+
+
+
+
 

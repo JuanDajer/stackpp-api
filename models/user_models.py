@@ -6,3 +6,7 @@ class UserIn(BaseModel):
 class UserOut(BaseModel):
     alias: str
     saldo: float
+class UserCash(BaseModel):
+    alias: str
+    valor: float
+

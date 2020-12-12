@@ -3,7 +3,7 @@ from datetime import datetime
 
 class CompraIn(BaseModel):
     alias: str
-    producto: int
+    producto: str
     cantidad: int
 
 class CompraOut(BaseModel):

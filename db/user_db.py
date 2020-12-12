@@ -53,3 +53,26 @@ def get_user(alias: str):
 def update_user(user_in_db: UserInDB):
     database_users[user_in_db.alias] = user_in_db
     return user_in_db
+
+def save_user(user_in_db: UserInDB):
+    if user_in_db.alias in database_users.keys():
+        return "Usuario existente"
+    else:
+        a = {user_in_db.alias:user_in_db}
+        database_users.update(a)
+        return user_in_db
+        
+def lista_user():
+    lista=[]
+    for i in database_users:
+        a = "Nombre:",database_users[i].nombre,"Apellido:",database_users[i].apellido,"Alias:",database_users[i].alias,"Saldo",database_users[i].saldo
+        lista.append(a)
+    return lista
+
+def delete_usuario(alias: str):
+    if alias in database_users.keys():
+        database_users.pop(alias)
+
+
+
+ 
