@@ -9,4 +9,7 @@ class UserOut(BaseModel):
 class UserCash(BaseModel):
     alias: str
     valor: float
+class UserGet(BaseModel):
+    alias: str
+
 

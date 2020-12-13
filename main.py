@@ -1,13 +1,13 @@
 from db.user_db import UserInDB
 from db.user_db import update_user, get_user, save_user, lista_user, delete_usuario
-from db.product_db import Producto
+'''from db.product_db import Producto
 from db.product_db import get_producto, update_producto, catalog_producto, save_product
 from db.compra_db import CompraInDB
-from db.compra_db import save_compra
+from db.compra_db import save_compra'''
 
-from models.user_models import UserIn, UserOut, UserCash
-from models.compra_models import CompraIn, CompraOut
-from models.product_moldels import ProductIn , ProductOut
+from models.user_models import UserIn, UserOut, UserCash, UserGet
+'''from models.compra_models import CompraIn, CompraOut
+from models.product_moldels import ProductIn , ProductOut'''
 
 import datetime
 from fastapi import FastAPI
@@ -15,7 +15,7 @@ from fastapi import HTTPException
 
 api = FastAPI()
 
-@api.post("/user/auth/")
+@api.get("/user/auth/")
 async def auth_user(user_in: UserIn):
     user_in_db = get_user(user_in.alias)
     if user_in_db == None:
@@ -25,16 +25,47 @@ async def auth_user(user_in: UserIn):
         return {"Autenticado": False}
     return {"Autenticado": True}
 
-@api.get("/user/saldo/{alias}")
-async def get_saldo(alias: str):
-    user_in_db = get_user(alias)
+@api.get("/user/saldo/")
+async def get_saldo(user_get: UserGet):
+    user_in_db = get_user(user_get.alias)
     if user_in_db == None:
         raise HTTPException(status_code=404,
                             detail="El usuario no existe")
     user_out = UserOut(**user_in_db.dict())
     return user_out
 
-@api.put("/user/compra/")
+@api.post("/user/create/")
+async def create_user(userIn: UserInDB):
+    user_in_db = UserInDB(**userIn.dict())
+    return save_user(user_in_db)
+
+@api.get("/user/lista/")
+async def user_list():
+    return lista_user()
+
+@api.put("/user/credito/")
+async def user_credito(user_cred: UserCash):
+    user_in_db = get_user(user_cred.alias)
+    if user_in_db == None:
+        raise HTTPException(status_code=404,
+                            detail="El usuario no existe")
+    else:
+        user_in_db.saldo = user_in_db.saldo + user_cred.valor
+        update_user(user_in_db)
+        return "Usuario:",user_in_db.alias,"Nuevo saldo:",user_in_db.saldo
+
+@api.delete("/user/borrar/")
+async def user_delete(user_get: UserGet):
+    usuario = get_user(user_get.alias)
+    if usuario == None:
+        raise HTTPException(status_code=404,
+                            detail="El usuario no existe")
+    else:  
+        delete_usuario(usuario.alias)
+        raise HTTPException(status_code=200,
+                                detail="El usuario ha sido eliminado")
+
+'''@api.put("/user/compra/")
 async def make_compra(compra_in: CompraIn):
     user_in_db = get_user(compra_in.alias)
     producto_in_db = get_producto(compra_in.producto)
@@ -66,33 +97,8 @@ async def catalog_product():
 async def create_product(productoIn: ProductIn):
     producto_in_db = Producto(**productoIn.dict(),id_producto=0)
     return save_product(producto_in_db)
+'''
 
-@api.put("/user/create/")
-async def create_user(userIn: UserInDB):
-    user_in_db = UserInDB(**userIn.dict())
-    return save_user(user_in_db)
-
-@api.post("/user/lista/")
-async def user_list():
-    return lista_user()
-
-@api.put("/user/credito/")
-async def user_credito(user_cred: UserCash):
-    user_in_db = get_user(user_cred.alias)
-    user_in_db.saldo = user_in_db.saldo + user_cred.valor
-    update_user(user_in_db)
-    return "Nuevo saldo:",user_in_db.saldo
-
-@api.delete("/user/borrar/{nombre}")
-async def user_delete(nombre: str):
-    usuario = get_user(nombre)
-    if usuario == None:
-        raise HTTPException(status_code=404,
-                            detail="El usuario no existe")
-    else:  
-        delete_usuario(nombre)
-        raise HTTPException(status_code=200,
-                                detail="El usuario ha sido eliminado")
 
 
 
